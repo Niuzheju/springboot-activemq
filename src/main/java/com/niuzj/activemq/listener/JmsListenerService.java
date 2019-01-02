@@ -4,6 +4,7 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
 import javax.jms.JMSException;
+import javax.jms.Session;
 import javax.jms.TextMessage;
 
 /**
@@ -12,11 +13,19 @@ import javax.jms.TextMessage;
 @Component
 public class JmsListenerService {
 
-    @JmsListener(destination = "default", containerFactory = "jmsListenerContainerFactory")
-    public void testMessage(TextMessage message){
+    @JmsListener(destination = "attest", containerFactory = "jmsListenerContainerFactory")
+    public void testMessage(TextMessage message, Session session) {
         try {
-            System.out.println(message.getText());
-            message.acknowledge();
+            String text = message.getText();
+            System.out.println(text);
+            int i = Integer.parseInt(text.charAt(text.length() - 1) + "");
+            if (i == 20) {
+                System.out.println("确认消息");
+                message.acknowledge();
+            } else {
+                session.recover();
+            }
+
         } catch (JMSException e) {
             e.printStackTrace();
         }

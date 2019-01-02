@@ -1,6 +1,7 @@
 package com.niuzj.activemq;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.RedeliveryPolicy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,8 +28,22 @@ public class BeanConfig {
     private String name;
 
     @Bean
-    public ActiveMQConnectionFactory getActiveMQConnectionFactory(){
-        return new ActiveMQConnectionFactory(user, password, url);
+    public RedeliveryPolicy redeliveryPolicy(){
+        RedeliveryPolicy policy = new RedeliveryPolicy();
+        policy.setUseExponentialBackOff(true);
+        policy.setMaximumRedeliveries(1);
+        policy.setInitialRedeliveryDelay(3000);
+        policy.setBackOffMultiplier(2);
+        policy.setMaximumRedeliveryDelay(1000);
+        return policy;
+    }
+
+
+    @Bean
+    public ActiveMQConnectionFactory getActiveMQConnectionFactory(RedeliveryPolicy policy){
+        ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(user, password, url);
+        factory.setRedeliveryPolicy(policy);
+        return factory;
     }
 
     @Bean
